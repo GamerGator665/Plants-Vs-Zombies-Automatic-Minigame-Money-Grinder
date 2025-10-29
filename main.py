@@ -147,37 +147,39 @@ def on_press_main(key):
     """Handles M/Q keybinds for automation."""
     global running, exit_prompt_active
 
-    try:
+    if hasattr(key, 'char') and key.char is not None:
         char = key.char.upper()
-    except AttributeError:
-        return
 
-    if char == 'M' and not running:
-        running = True
-        print("Starting automation...")
-        t = threading.Thread(target=automation_logic, daemon=True)
-        t.start()
-   
+        if char == 'M' and not running:
+            running = True
+            print("Starting automation...")
+            t = threading.Thread(target=automation_logic, daemon=True)
+            t.start()
 
-    elif char == 'Q':
-        if running:
-            running = False
-            print("Automation will stop after current action.")
-            print("Press Enter to terminate the program.")
-        else:
-            print("automation already stopped.")
-            print("Press Enter to terminate the program.")
+        elif char == 'Q':
+            if running:
+                running = False
+                print("Automation will stop after current action.")
+                print("Press Enter to terminate the program.")
+            else:
+                print("Automation already stopped.")
+                print("Press Enter to terminate the program.")
 
-        exit_request.set()  
+            exit_request.set()
 
-    elif char == 'C':
-        print("Starting coordinate re-capture...")
-        recapture_coordinates()
+        elif char == 'C':
+            print("Starting coordinate re-capture...")
+            recapture_coordinates()
 
-    elif char == 'R':
-        print("Loading README file...")
-        readme_documentation()
+        elif char == 'R':
+            print("Loading README file...")
+            readme_documentation()
 
+    elif key == keyboard.Key.enter:
+        if not running:
+            print("Terminating program... Please wait...")
+            time.sleep(random.uniform(1.5,5))
+            os._exit(0)
 
 def listen_for_keybinds():
     """Sets up the keyboard listener for M/Q/C/R."""
@@ -263,5 +265,6 @@ if __name__ == "__main__":
         listen_for_keybinds()
     except KeyboardInterrupt:
         sys.exit()
+
 
 
