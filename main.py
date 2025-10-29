@@ -16,7 +16,7 @@ coord_labels = ["Minigame/Survival Icon", "Continue", "Money Bag/Trophy"]
 capture_index = 0
 capture_done = False
 listener = None 
-# Handling of exit requests:
+# Everything below here is part of that random code I threw together that where I said, and I quote: "I don't know what happened here, but this was the only thing I could figure out to handle Q presses that didn't make the whole program collapse.":
 exit_request = threading.Event()  
 exit_confirmed = threading.Event()  
 
@@ -37,10 +37,10 @@ def on_press_capture(key):
 
             if capture_index >= len(coord_labels):
                 capture_done = True
-                print("\nAll coordinates captured successfully!")
+                print("All coordinates captured successfully!")
                 return False
             else:
-                print(f"\nMove your mouse to the {coord_labels[capture_index]} and press SPACE...")
+                print(f"Move your mouse to the {coord_labels[capture_index]} and press SPACE...")
 
     except AttributeError:
         pass
@@ -66,7 +66,7 @@ def get_coordinates_via_spacebar():
         with keyboard.Listener(on_press=on_press_capture) as listener:
             listener.join()
 
-    print("\nCaptured Coordinates:")
+    print("Captured Coordinates:")
     for label, (x, y) in captured_coords.items():
         print(f"{label}: ({x}, {y})")
 
@@ -74,7 +74,7 @@ def get_coordinates_via_spacebar():
 
 
 # ----------------------------------------------------------------------
-# 3. AUTOMATION LOGIC
+# Automation
 # ----------------------------------------------------------------------
 DELAY_AFTER_CLICK = 0
 DELAY_FOR_LOOP = 6
@@ -95,26 +95,22 @@ def automation_logic():
     global running
 
     print("=============================================")
-    print("= STARTING AUTOMATION LOOP (Press 'Q' to Stop) =")
+    print("STARTING AUTOMATION LOOP (Press 'Q' to Stop)")
 
     while running:
         try:
             print("Collecting $500/$1250")
 
-            # 1. Minigame/Survival Icon
             x_star, y_star = captured_coords["Minigame/Survival Icon"]
             click_at_position(x_star, y_star, "Minigame/Survival Icon")
 
-            # 2. Continue Button
             x_cont, y_cont = captured_coords["Continue"]
             click_at_position(x_cont, y_cont, "Continue")
 
-            # 3. Money Bag
             x_bag, y_bag = captured_coords["Money Bag/Trophy"]
             click_at_position(x_bag, y_bag, "Money Bag/Trophy")
             print("Money bag successfully collected.")
 
-            # Delay between loops
             print(f"Pausing for {DELAY_FOR_LOOP} seconds before looping...")
             for _ in range(int(DELAY_FOR_LOOP * 10)):
                 if not running:
@@ -127,25 +123,22 @@ def automation_logic():
 
 
 # ----------------------------------------------------------------------
-# 4. START / STOP KEYBINDS
+# Keybinds
 # ----------------------------------------------------------------------
 
 def exit_thread_worker():
-    """Handles Q presses and waits for ENTER."""
+    """I don't know what happened here, but this was the only thing I could figure out to handle Q presses that didn't make the whole program collapse."""
     while True:
-        exit_request.wait()  # Wait until Q is pressed
-        exit_request.clear()  # Reset for next Q press
+        exit_request.wait()  
+        exit_request.clear()  
 
-        # Show prompt
         try:
-            input("\nPress ENTER to fully exit the program...")
+            input("Press ENTER to fully exit the program...")
         except (EOFError, KeyboardInterrupt):
             pass
         
-        # Mark that exit is confirmed
         exit_confirmed.set()
 
-        print("[INFO] Exiting program immediately...")
         sys.exit(0)
 
 
@@ -159,46 +152,35 @@ def on_press_main(key):
     except AttributeError:
         return
 
-    # Start automation
     if char == 'M' and not running:
         running = True
-        print("[INFO] Starting automation...")
+        print("Starting automation...")
         t = threading.Thread(target=automation_logic, daemon=True)
         t.start()
+   
 
-    # Clear any pending exit request
-        if exit_request.is_set():
-            print("[INFO] Automation resumed. Canceling pending exit prompt.")
-            exit_request.clear()
-
-
-    # Stop automation
     elif char == 'Q':
         if running:
             running = False
-            print("[INFO] 'Q' key detected. Automation will stop after current action.")
-            print("\nPress Enter to terminate the program.")
+            print("Automation will stop after current action.")
+            print("Press Enter to terminate the program.")
         else:
-            print("[INFO] 'Q' pressed — automation already stopped.")
-            print("\nPress Enter to terminate the program.")
+            print("automation already stopped.")
+            print("Press Enter to terminate the program.")
 
-        # Always start a new exit thread for each Q press
-        exit_request.set()  # Signal the exit thread to show prompt
+        exit_request.set()  
 
-
-    # Re-capture coordinates
     elif char == 'C':
-        print("[INFO] 'C' key detected. Starting coordinate re-capture...")
+        print("Starting coordinate re-capture...")
         recapture_coordinates()
 
-    # View README file
     elif char == 'R':
-        print("[INFO] Loading README file...")
+        print("Loading README file...")
         readme_documentation()
 
 
 def listen_for_keybinds():
-    """Sets up the keyboard listener for M/Q."""
+    """Sets up the keyboard listener for M/Q/C/R."""
     global listener
     print("-----------------------------------------------------")
     print("Automation Controls:")
@@ -216,12 +198,12 @@ def listen_for_keybinds():
 
 
 def recapture_coordinates():
-    """Re-captures all coordinates (on 'C' press)."""
+    """Re-captures all coordinates)."""
     global captured_coords, capture_index, capture_done, running
 
     if running:
         running = False
-        print("[INFO] Due to coordinate re-capture, automation has been paused.")
+        print(" Due to coordinate re-capture, automation has been paused.")
 
     captured_coords.clear()
     capture_index = 0
@@ -229,7 +211,7 @@ def recapture_coordinates():
 
     new_coords = get_coordinates_via_spacebar()
     captured_coords.update(new_coords)
-    print("[INFO] Coordinates successfully updated.")
+    print(" Coordinates successfully updated.")
     listen_for_keybinds()
 
 
@@ -239,7 +221,7 @@ def readme_documentation():
 
     if running:
         running = False
-        print("[INFO] Due to the execution of the README output, automation has been paused.")
+        print("Due to the execution of the README output, automation has been paused.")
 
     print("Loading... Please wait...")
     time.sleep(random.uniform(0.5, 1.5))
@@ -249,7 +231,6 @@ def readme_documentation():
     time.sleep(5)
     try:
         try:
-            # Attempt to use rich for nicer Markdown rendering
             from rich.console import Console
             from rich.markdown import Markdown
 
@@ -260,7 +241,6 @@ def readme_documentation():
             console.print(Markdown(md_content))
 
         except (ImportError, FileNotFoundError):
-            # If rich isn't installed or README.md is missing, fallback to plain print
             try:
                 with open("README.md", "r", encoding="utf-8") as f:
                     print("Rich library not found, falling back to plaintext, there may be a lot of *s.")
@@ -268,16 +248,14 @@ def readme_documentation():
             except FileNotFoundError:
                 print("Error: README.md file not found.")
             except Exception as e:
-                # Catch anything else just in case
                 print(f"An error occurred while reading README.md: {e}")
 
     except Exception as e:
-        # Catch any remaining unexpected errors to prevent pynput traceback
         print(f"[ERROR] Could not display README: {e}")
 
 
 # ----------------------------------------------------------------------
-# 5. Execution
+# This is practically the main code. That's the power of subroutines!
 # ----------------------------------------------------------------------
 if __name__ == "__main__":
     try:
@@ -285,3 +263,5 @@ if __name__ == "__main__":
         listen_for_keybinds()
     except KeyboardInterrupt:
         sys.exit()
+
+
