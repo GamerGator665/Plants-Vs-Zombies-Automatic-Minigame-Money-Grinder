@@ -4,7 +4,7 @@ PvZ Automatic Minigame Money Grinder (PVZ-AMMG) - README
 
 ----------------
 
-Version: 1.0
+Version: 1.0.1
 
 This Python script automates the process of grinding money in Plants vs. Zombies (PvZ) by repeatedly collecting a money bag at the end of a minigame.
 
@@ -176,3 +176,4 @@ The script is now ready and waiting for your command.
 * **Q: My question isn't here!**
 
 * **A:** Please add an issue to the GitHub repository.
+
